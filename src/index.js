@@ -1,8 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import ServerAddrs from './ServerAddrs';
+import App from './App';
 
 ReactDOM.render(
-  <ServerAddrs/>,
+  <App/>,
   document.getElementById('root')
 );
