@@ -1,9 +1,8 @@
 import React from "react";
-import ServerRow from "./ServerRow";
 import InputFilter from "./InputFilter";
-import './App.css';
 
-import { ToastContainer, toast } from "react-toastify";
+import { Input, Message, Button, Table, Menu } from "element-react";
+import "element-theme-default";
 import "react-toastify/dist/ReactToastify.css";
 
 function validateIpAndPort(input) {
@@ -27,28 +26,96 @@ function validateNum(input, min, max) {
 class App extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {
-            token: "增减记录需要输入token",
+        const initialState = {
+            token: "",
             filter: "",
             error: null,
             isLoaded: false,
             servers: [],
+            // 因为在element-ui的回调现在只知道可以通过index确定是那个服务器
+            filteredservers: [],
         };
 
+        // 刷新保持state
+        this.state = JSON.parse(localStorage.getItem("state"))
+            ? JSON.parse(localStorage.getItem("state"))
+            : initialState;
+
         this.tokenHandleChange = (event) => {
-            this.setState({ token: event.target.value });
+            this.setState({ token: event });
         };
         this.serverFilterHandleChange = (event) => {
-            this.setState({ filter: event.target.value });
+            const filteredservers = this.state.servers.filter((server) =>
+                (server.ip + ":" + server.port).includes(event)
+            );
+            this.setState({ filter: event, filteredservers: filteredservers });
         };
 
         this.onClickAdd.bind(this);
         this.onClickDelete.bind(this);
+
+        // 刷新保持state
+        const orginial = this.setState;
+        this.setState = function () {
+            let arguments0 = arguments[0];
+            let arguments1 = () => (
+                arguments[1],
+                localStorage.setItem("state", JSON.stringify(this.state))
+            );
+            orginial.bind(this)(arguments0, arguments1);
+        };
+
+        this.columns = [
+            {
+                label: "服务器地址",
+                width: 250,
+                fixed: "left",
+                prop: "serverStringData",
+                align: "center",
+            },
+            {
+                label: "操作",
+                width: 120,
+                align: "center",
+                render: (row, column, index) => {
+                    return (
+                        <span>
+                            <Button
+                                type="primary"
+                                onClick={(e) =>
+                                    this.onClickDelete(
+                                        this.state.filteredservers[index],
+                                        e
+                                    )
+                                }
+                            >
+                                移除
+                            </Button>
+                        </span>
+                    );
+                },
+            },
+        ];
     }
 
     onClickAdd(serverString) {
         if (!validateIpAndPort(serverString)) {
-            toast.error("服务器地址格式错误");
+            Message.error("服务器地址格式错误");
+            return;
+        }
+        const server = {
+            ip: serverString.split(":")[0],
+            port: parseInt(serverString.split(":")[1]),
+        };
+
+        var isIncluded = false;
+        this.state.servers.forEach(function (item) {
+            if (item.ip === server.ip && item.port === server.port) {
+                isIncluded = true;
+            }
+        });
+        if (isIncluded) {
+            Message.warning("此服务器已经在列表中");
             return;
         }
         const requestOptions = {
@@ -56,10 +123,7 @@ class App extends React.Component {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 token: this.state.token,
-                data: {
-                    ip: serverString.split(":")[0],
-                    port: parseInt(serverString.split(":")[1]),
-                },
+                data: server,
             }),
         };
         fetch("https://49.232.3.102:10443/api/v1/server_list", requestOptions)
@@ -67,18 +131,24 @@ class App extends React.Component {
             .then(
                 (result) => {
                     if (result.Code === 0) {
-                        toast.success("添加成功");
-                        this.state.servers.push({
-                            ip: serverString.split(":")[0],
-                            port: serverString.split(":")[1],
+                        Message.success("添加成功");
+                        this.state.servers.push(server);
+                        const filteredservers = this.state.servers.filter(
+                            (server) =>
+                                (server.ip + ":" + server.port).includes(
+                                    this.state.filter
+                                )
+                        );
+                        this.setState({
+                            servers: this.state.servers,
+                            filteredservers: filteredservers,
                         });
-                        this.setState({ servers: this.state.servers });
                     } else {
-                        toast.error("返回错误：" + result.Message);
+                        Message.error("返回错误：" + result.Message);
                     }
                 },
                 (error) => {
-                    toast.error("请求失败：" + error);
+                    Message.error("请求失败：" + error);
                 }
             );
     }
@@ -100,14 +170,25 @@ class App extends React.Component {
             .then(
                 (result) => {
                     if (result.Code === 0) {
-                        toast.success("删除成功");
-                        this.setState({ servers: this.state.servers.filter(function(value){ return !(value.ip === server.ip && value.port === server.port);}) });
+                        Message.success("删除成功");
+                        const servers = this.state.servers.filter(
+                            (_server) => server !== _server
+                        );
+                        const filteredservers = servers.filter((server) =>
+                            (server.ip + ":" + server.port).includes(
+                                this.state.filter
+                            )
+                        );
+                        this.setState({
+                            servers: servers,
+                            filteredservers: filteredservers,
+                        });
                     } else {
-                        toast.error("返回错误：" + result.Message);
+                        Message.error("返回错误：" + result.Message);
                     }
                 },
                 (error) => {
-                    toast.error("请求失败：" + error);
+                    Message.error("请求失败：" + error);
                 }
             );
     }
@@ -135,42 +216,41 @@ class App extends React.Component {
     }
 
     render() {
-        const { token, filter, error, isLoaded, servers } = this.state;
+        const { token, filter, error, isLoaded, filteredservers } = this.state;
         if (error) {
             return <div>Error: {error.message}</div>;
         } else if (!isLoaded) {
             return <div>Loading...</div>;
         } else {
-            const filteredservers = servers.filter((server) =>
-                (server.ip + ":" + server.port).includes(filter)
-            );
             return (
                 <div>
-                    <input value={token} onChange={this.tokenHandleChange} />
+                    <div>
+                        <Menu
+                            theme="dark"
+                            defaultActive="1"
+                            className="el-menu-demo"
+                            mode="horizontal"
+                        >
+                            <Menu.Item index="1">TeeMaster 控制中心</Menu.Item>
+                        </Menu>
+                    </div>
+                    <Input
+                        placeholder="增减记录需要输入token"
+                        value={token}
+                        onChange={this.tokenHandleChange}
+                    />
                     <InputFilter
                         serverFilter={filter}
                         serverFilterHandleChange={this.serverFilterHandleChange}
                         onClickAdd={(e) => this.onClickAdd(filter, e)}
                     />
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>服务器地址</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredservers.map((server) => (
-                                <ServerRow
-                                    server={server}
-                                    onClickDelete={(e) =>
-                                        this.onClickDelete(server, e)
-                                    }
-                                    key={server.ip + ":" + server.port}
-                                />
-                            ))}
-                        </tbody>
-                    </table>
-                    <ToastContainer />
+                    <Table
+                        columns={this.columns}
+                        data={filteredservers.map((server) => ({
+                            serverStringData: server.ip + ":" + server.port,
+                        }))}
+                        border={true}
+                    />
                 </div>
             );
         }
