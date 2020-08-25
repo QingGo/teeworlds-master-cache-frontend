@@ -26,6 +26,7 @@ function validateNum(input, min, max) {
 class App extends React.Component {
     constructor(props) {
         super(props);
+        this.api_url = "https://teeworld-master-cache.herokuapp.com/api/v1/server_list"
         const initialState = {
             token: "",
             filter: "",
@@ -126,7 +127,7 @@ class App extends React.Component {
                 data: server,
             }),
         };
-        fetch("https://49.232.3.102:10443/api/v1/server_list", requestOptions)
+        fetch(this.api_url, requestOptions)
             .then((res) => res.json())
             .then(
                 (result) => {
@@ -165,7 +166,7 @@ class App extends React.Component {
                 },
             }),
         };
-        fetch("https://49.232.3.102:10443/api/v1/server_list", requestOptions)
+        fetch(this.api_url, requestOptions)
             .then((res) => res.json())
             .then(
                 (result) => {
@@ -194,7 +195,7 @@ class App extends React.Component {
     }
 
     componentDidMount() {
-        fetch("https://49.232.3.102:10443/api/v1/server_list")
+        fetch(this.api_url)
             .then((res) => res.json())
             .then(
                 (result) => {
