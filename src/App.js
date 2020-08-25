@@ -198,12 +198,20 @@ class App extends React.Component {
             .then((res) => res.json())
             .then(
                 (result) => {
+                    const servers = result.Data.map((server) => ({
+                        ip: server.ip,
+                        port: server.port,
+                    }))
+                    const filteredservers = servers.filter(
+                        (server) =>
+                            (server.ip + ":" + server.port).includes(
+                                this.state.filter
+                            )
+                    );
                     this.setState({
                         isLoaded: true,
-                        servers: result.Data.map((server) => ({
-                            ip: server.ip,
-                            port: server.port,
-                        })),
+                        servers: servers,
+                        filteredservers: filteredservers
                     });
                 },
                 (error) => {
