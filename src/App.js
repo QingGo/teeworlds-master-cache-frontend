@@ -1,7 +1,7 @@
 import React from "react";
 import InputFilter from "./InputFilter";
 
-import { Input, Message, Button, Table, Menu } from "element-react";
+import { Input, Message, Button, Table, Menu, Loading } from "element-react";
 import "element-theme-default";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -27,6 +27,7 @@ class App extends React.Component {
     constructor(props) {
         super(props);
         this.api_url = "https://teeworld-master-cache.herokuapp.com/api/v1/server_list"
+        // this.api_url = "http://127.0.0.1:18080/api/v1/server_list";
         const initialState = {
             token: "",
             filter: "",
@@ -37,10 +38,20 @@ class App extends React.Component {
             filteredservers: [],
         };
 
-        // 刷新保持state
-        this.state = JSON.parse(localStorage.getItem("state"))
+        // 刷新保持state，但是只希望保持token和filter，
+        const oldstate = JSON.parse(localStorage.getItem("state"))
             ? JSON.parse(localStorage.getItem("state"))
             : initialState;
+
+        this.state = {
+            token: oldstate.token,
+            filter: oldstate.filter,
+            error: null,
+            isLoaded: false,
+            servers: [],
+            // 因为在element-ui的回调现在只知道可以通过index确定是那个服务器
+            filteredservers: [],
+        };
 
         this.tokenHandleChange = (event) => {
             this.setState({ token: event });
@@ -202,17 +213,16 @@ class App extends React.Component {
                     const servers = result.Data.map((server) => ({
                         ip: server.ip,
                         port: server.port,
-                    }))
-                    const filteredservers = servers.filter(
-                        (server) =>
-                            (server.ip + ":" + server.port).includes(
-                                this.state.filter
-                            )
+                    }));
+                    const filteredservers = servers.filter((server) =>
+                        (server.ip + ":" + server.port).includes(
+                            this.state.filter
+                        )
                     );
                     this.setState({
                         isLoaded: true,
                         servers: servers,
-                        filteredservers: filteredservers
+                        filteredservers: filteredservers,
                     });
                 },
                 (error) => {
@@ -227,12 +237,11 @@ class App extends React.Component {
     render() {
         const { token, filter, error, isLoaded, filteredservers } = this.state;
         if (error) {
-            return <div>Error: {error.message}</div>;
-        } else if (!isLoaded) {
-            return <div>Loading...</div>;
+            return <Loading  text="加载错误，请刷新" fullscreen={true} />;
         } else {
             return (
                 <div>
+                    {!isLoaded && <Loading  text="拼命加载中" fullscreen={true} />}
                     <div>
                         <Menu
                             theme="dark"
