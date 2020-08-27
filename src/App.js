@@ -26,7 +26,9 @@ function validateNum(input, min, max) {
 class App extends React.Component {
     constructor(props) {
         super(props);
-        this.api_url = "https://teeworld-master-cache.herokuapp.com/api/v1/server_list"
+        // 国外服务器体验太差，先不管告警问题了
+        this.api_url ="https://49.232.3.102:10443/api/v1/server_list"
+            // "https://teeworld-master-cache.herokuapp.com/api/v1/server_list";
         // this.api_url = "http://127.0.0.1:18080/api/v1/server_list";
         const initialState = {
             token: "",
@@ -224,6 +226,7 @@ class App extends React.Component {
                         servers: servers,
                         filteredservers: filteredservers,
                     });
+                    Message.success("共获取" + servers.length + "条服务器信息");
                 },
                 (error) => {
                     this.setState({
@@ -237,11 +240,13 @@ class App extends React.Component {
     render() {
         const { token, filter, error, isLoaded, filteredservers } = this.state;
         if (error) {
-            return <Loading  text="加载错误，请刷新" fullscreen={true} />;
+            return <Loading text="加载错误，请刷新" fullscreen={true} />;
         } else {
             return (
                 <div>
-                    {!isLoaded && <Loading  text="拼命加载中" fullscreen={true} />}
+                    {!isLoaded && (
+                        <Loading text="拼命加载中" fullscreen={true} />
+                    )}
                     <div>
                         <Menu
                             theme="dark"
