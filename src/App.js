@@ -1,7 +1,7 @@
 import React from "react";
 import InputFilter from "./InputFilter";
 
-import { Input, Message, Button, Table, Menu, Loading } from "element-react";
+import { Input, Message, Button, Table, Menu, Loading, Pagination } from "element-react";
 import "element-theme-default";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -27,17 +27,12 @@ class App extends React.Component {
     constructor(props) {
         super(props);
         // 国外服务器体验太差，先不管告警问题了
-        this.api_url ="https://49.232.3.102:10443/api/v1/server_list"
-            // "https://teeworld-master-cache.herokuapp.com/api/v1/server_list";
+        this.api_url = "https://49.232.3.102:10443/api/v1/server_list"
+        // "https://teeworld-master-cache.herokuapp.com/api/v1/server_list";
         // this.api_url = "http://127.0.0.1:18080/api/v1/server_list";
         const initialState = {
             token: "",
             filter: "",
-            error: null,
-            isLoaded: false,
-            servers: [],
-            // 因为在element-ui的回调现在只知道可以通过index确定是那个服务器
-            filteredservers: [],
         };
 
         // 刷新保持state，但是只希望保持token和filter，
@@ -48,6 +43,7 @@ class App extends React.Component {
         this.state = {
             token: oldstate.token,
             filter: oldstate.filter,
+            page: 1,
             error: null,
             isLoaded: false,
             servers: [],
@@ -62,19 +58,22 @@ class App extends React.Component {
             const filteredservers = this.state.servers.filter((server) =>
                 (server.ip + ":" + server.port).includes(event)
             );
-            this.setState({ filter: event, filteredservers: filteredservers });
+            this.setState({ page:1, filter: event, filteredservers: filteredservers });
         };
+        this.changePage = (event) => {
+            this.setState({ page: event })
+        }
 
         this.onClickAdd.bind(this);
         this.onClickDelete.bind(this);
+
 
         // 刷新保持state
         const orginial = this.setState;
         this.setState = function () {
             let arguments0 = arguments[0];
             let arguments1 = () => (
-                arguments[1],
-                localStorage.setItem("state", JSON.stringify(this.state))
+                arguments[1], localStorage.setItem("state", JSON.stringify(this.state))
             );
             orginial.bind(this)(arguments0, arguments1);
         };
@@ -269,11 +268,14 @@ class App extends React.Component {
                     />
                     <Table
                         columns={this.columns}
-                        data={filteredservers.map((server) => ({
+                        data={filteredservers.slice((this.state.page-1)*50,this.state.page*50).map((server) => ({
                             serverStringData: server.ip + ":" + server.port,
                         }))}
                         border={true}
                     />
+                    <div className="block">
+                        <Pagination layout="total, prev, pager, next, jumper" onCurrentChange={this.changePage} total={this.state.filteredservers.length} pageSize={50} currentPage={1} />
+                    </div>
                 </div>
             );
         }
