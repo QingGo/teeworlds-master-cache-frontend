@@ -27,7 +27,7 @@ class App extends React.Component {
     constructor(props) {
         super(props);
         // 国外服务器体验太差，先不管告警问题了
-        this.api_url = "https://49.232.3.102:10443/api/v1/server_list"
+        this.api_url = "https://master.tw.actom.me/api/v1/server_list"
         // "https://teeworld-master-cache.herokuapp.com/api/v1/server_list";
         // this.api_url = "http://127.0.0.1:18080/api/v1/server_list";
         const initialState = {
