@@ -1,0 +1,23 @@
+{
+  "files": {
+    "main.js": "/teeworlds-master-cache-frontend/static/js/main.388dabfe.chunk.js",
+    "main.js.map": "/teeworlds-master-cache-frontend/static/js/main.388dabfe.chunk.js.map",
+    "runtime-main.js": "/teeworlds-master-cache-frontend/static/js/runtime-main.f9cf5da2.js",
+    "runtime-main.js.map": "/teeworlds-master-cache-frontend/static/js/runtime-main.f9cf5da2.js.map",
+    "static/css/2.99a37587.chunk.css": "/teeworlds-master-cache-frontend/static/css/2.99a37587.chunk.css",
+    "static/js/2.ffde4c4a.chunk.js": "/teeworlds-master-cache-frontend/static/js/2.ffde4c4a.chunk.js",
+    "static/js/2.ffde4c4a.chunk.js.map": "/teeworlds-master-cache-frontend/static/js/2.ffde4c4a.chunk.js.map",
+    "index.html": "/teeworlds-master-cache-frontend/index.html",
+    "precache-manifest.344c624386daea7c2ffccf49f7c5861f.js": "/teeworlds-master-cache-frontend/precache-manifest.344c624386daea7c2ffccf49f7c5861f.js",
+    "service-worker.js": "/teeworlds-master-cache-frontend/service-worker.js",
+    "static/css/2.99a37587.chunk.css.map": "/teeworlds-master-cache-frontend/static/css/2.99a37587.chunk.css.map",
+    "static/js/2.ffde4c4a.chunk.js.LICENSE.txt": "/teeworlds-master-cache-frontend/static/js/2.ffde4c4a.chunk.js.LICENSE.txt",
+    "static/media/index.css": "/teeworlds-master-cache-frontend/static/media/element-icons.d2f69a92.woff"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.f9cf5da2.js",
+    "static/css/2.99a37587.chunk.css",
+    "static/js/2.ffde4c4a.chunk.js",
+    "static/js/main.388dabfe.chunk.js"
+  ]
+}
